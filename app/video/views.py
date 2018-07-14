@@ -15,6 +15,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 def get_video():
     path1 = request.json['url1']
     path2 = request.json['url2']
+    face1 = request.json['face1']
+    face2 = request.json['face2']
     print(path1, path2)
     # 传过来的文件名字
     if path1 is not None and path2 is not None:
@@ -29,7 +31,7 @@ def get_video():
             # thr = threading.Thread(target=deal_video, args=(app, path1, path2))
             # thr.start()
 
-            out_url = face_swap.deal_video(path1, path2)
+            out_url = face_swap.deal_video(path1, face1, path2, face2, True)
 
             return out_url
         else:

@@ -9,7 +9,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    # 此处定义全局变量
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'zl12345678'  # 设置密钥，可能会用在某些涉及到加解密的功能中
     SQLALCHEMY_TRACK_MODIFICATIONS = True                      # 该项不设置为True的话可能会导致数据库报错
 
@@ -34,7 +33,6 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # 连接测试环境数据库的URL
     SQLALCHEMY_DATABASE_URI = (os.environ.get('DEV_DATABASE_URL') or
                                'mysql://root:2018@localhost/faceswap_dev')
 
@@ -48,7 +46,6 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    # 连接生产环境数据库的URL
     SQLALCHEMY_DATABASE_URI = (os.environ.get('DEV_DATABASE_URL') or
                                'mysql://root:2018@localhost/faceswap_pro')
 

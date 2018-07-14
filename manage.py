@@ -1,7 +1,7 @@
 """
 本文件是flask项目的启动脚本
 常用命令包括：
-1. python manage.py runserver  启动服务进程(单线程)
+1. python manage.py runserver  启动服务进程
 2. python manage.py db init/migrate/update  管理数据库
 """
 import os
