@@ -1,11 +1,8 @@
-from flask import request, current_app, abort
+from flask import request
 import os
 
 from .FaceSwap import FaceSwap
 from . import video
-from ..models import Task
-from .. import db
-import threading
 
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,17 +19,7 @@ def get_video():
     if path1 is not None and path2 is not None:
         if os.path.exists(path1) and os.path.exists(path2):
             face_swap = FaceSwap()
-            task = Task(src_url=str(path1), tag_url=str(path2))
-            db.session.add(task)
-            db.session.commit()
-
-            # 异步处理视频
-            # return_value = str(task.id)
-            # thr = threading.Thread(target=deal_video, args=(app, path1, path2))
-            # thr.start()
-
             out_url = face_swap.deal_video(path1, face1, path2, face2, True)
-
             return out_url
         else:
             return "file is not exist!"
