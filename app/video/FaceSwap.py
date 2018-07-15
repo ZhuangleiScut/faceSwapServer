@@ -192,7 +192,6 @@ class FaceSwap(object):
             os.remove(self.basedir+'/result/{i}.jpg'.format(i=i))
 
             end = time.time()
-            print(i, end - start)
             i += 1
         video_writer.release()
 
