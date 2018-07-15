@@ -6,10 +6,6 @@ import time
 import ffmpy
 
 
-class NoFaces(Exception):
-    pass
-
-
 class FaceSwap(object):
     def __init__(self):
         self.SCALE_FACTOR = 1
@@ -42,8 +38,7 @@ class FaceSwap(object):
         if len(face_rect) > 1:
             return np.matrix([[p.x, p.y] for p in self.shape_predictor(im, face_rect[face_flag]).parts()])
         elif len(face_rect) == 0:
-            print('No face.We need at least one face.')
-            raise NoFaces
+            return None
         else:
             return np.matrix([[p.x, p.y] for p in self.shape_predictor(im, face_rect[0]).parts()])
 
@@ -136,22 +131,26 @@ class FaceSwap(object):
         landmark1 = self.get_landmarks(srcImg, face_src)
         landmark2 = self.get_landmarks(trgImg, face_user)
 
-        transformation_matrix = self.transformation_from_points(landmark1[self.ALIGN_POINTS], landmark2[self.ALIGN_POINTS])
+        if landmark1 is not None and landmark2 is not None:
+            transformation_matrix = self.transformation_from_points(landmark1[self.ALIGN_POINTS],
+                                                                    landmark2[self.ALIGN_POINTS])
 
-        mask = self.get_face_mask(trgImg, landmark2)
+            mask = self.get_face_mask(trgImg, landmark2)
 
-        warped_mask = self.warp_im(mask, transformation_matrix, srcImg.shape)
+            warped_mask = self.warp_im(mask, transformation_matrix, srcImg.shape)
 
-        combined_mask = np.max([self.get_face_mask(srcImg, landmark1), warped_mask], axis=0)
+            combined_mask = np.max([self.get_face_mask(srcImg, landmark1), warped_mask], axis=0)
 
-        warped_img2 = self.warp_im(trgImg, transformation_matrix, srcImg.shape)
+            warped_img2 = self.warp_im(trgImg, transformation_matrix, srcImg.shape)
 
-        warped_corrected_img2 = self.correct_colors(srcImg, warped_img2, landmark1)
-        warped_corrected_img2_temp = np.zeros(warped_corrected_img2.shape, dtype=warped_corrected_img2.dtype)
-        cv2.normalize(warped_corrected_img2, warped_corrected_img2_temp, 0, 1, cv2.NORM_MINMAX)
+            warped_corrected_img2 = self.correct_colors(srcImg, warped_img2, landmark1)
+            warped_corrected_img2_temp = np.zeros(warped_corrected_img2.shape, dtype=warped_corrected_img2.dtype)
+            cv2.normalize(warped_corrected_img2, warped_corrected_img2_temp, 0, 1, cv2.NORM_MINMAX)
 
-        output = srcImg * (1.0 - combined_mask) + warped_corrected_img2 * combined_mask
-        return output
+            output = srcImg * (1.0 - combined_mask) + warped_corrected_img2 * combined_mask
+            return output
+        else:
+            return None
 
     def deal_video(self, path_src, face_src, path_user, face_user, out_id, flip=False):
         video1 = cv2.VideoCapture(path_src)
@@ -171,10 +170,15 @@ class FaceSwap(object):
             val1, frame1 = video1.read()
             val2, frame2 = video2.read()
         i = 0
+        index1 = 1
+        index2 = 1
         while frame1 is not None and frame2 is not None:
             start = time.time()
             val1, frame1 = video1.read()
-            val2, frame2 = video2.read()
+            index1 += 1
+            while index2 < index1 * fps2 / fps1:
+                val2, frame2 = video2.read()
+                index2 += 1
 
             if flip:
                 # 左右翻转
@@ -182,14 +186,18 @@ class FaceSwap(object):
 
             if frame1 is not None and frame2 is not None:
                 out_image = self.deal_image(frame1, face_src, frame2, face_user)
-                im = cv2.resize(out_image, img_size)
+                if out_image is not None:
+                    im = cv2.resize(out_image, img_size)
 
-                cv2.imwrite(self.basedir+'/result/{i}.jpg'.format(i=i), im)
+                    cv2.imwrite(self.basedir + '/result/{i}.jpg'.format(i=i), im)
 
-                im = cv2.imread(self.basedir+'/result/{i}.jpg'.format(i=i))
+                    im = cv2.imread(self.basedir + '/result/{i}.jpg'.format(i=i))
 
-                video_writer.write(im)
-                os.remove(self.basedir+'/result/{i}.jpg'.format(i=i))
+                    video_writer.write(im)
+                    os.remove(self.basedir + '/result/{i}.jpg'.format(i=i))
+                else:
+                    continue
+
             i += 1
             print(i)
         video_writer.release()

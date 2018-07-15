@@ -22,11 +22,12 @@ def get_video():
         if os.path.exists(path1) and os.path.exists(path2):
             face_swap = FaceSwap()
             out = face_swap.deal_video(path1, face1, path2, face2, id, True)
-            if out:
-                finish_id = {'videoId': id}
-                requests.get('127.0.0.1:8001/video/make/finish', params=finish_id)
-            else:
-                return "video process error!"
+            # if out:
+            #     finish_id = {'videoId': id}
+            #     requests.get('127.0.0.1:8001/video/make/finish', params=finish_id)
+            # else:
+            #     return "video process error!"
+            return "done!"
         else:
             return "file is not exist!"
     else:
