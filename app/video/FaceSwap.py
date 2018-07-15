@@ -153,7 +153,7 @@ class FaceSwap(object):
         output = srcImg * (1.0 - combined_mask) + warped_corrected_img2 * combined_mask
         return output
 
-    def deal_video(self, path_src, face_src, path_user, face_user, flip=False):
+    def deal_video(self, path_src, face_src, path_user, face_user, out_id, flip=False):
         video1 = cv2.VideoCapture(path_src)
         video2 = cv2.VideoCapture(path_user)
         fps1 = video1.get(cv2.CAP_PROP_FPS)
@@ -182,27 +182,23 @@ class FaceSwap(object):
 
             if frame1 is not None and frame2 is not None:
                 out_image = self.deal_image(frame1, face_src, frame2, face_user)
-            im = cv2.resize(out_image, img_size)
+                im = cv2.resize(out_image, img_size)
 
-            cv2.imwrite(self.basedir+'/result/{i}.jpg'.format(i=i), im)
+                cv2.imwrite(self.basedir+'/result/{i}.jpg'.format(i=i), im)
 
-            im = cv2.imread(self.basedir+'/result/{i}.jpg'.format(i=i))
+                im = cv2.imread(self.basedir+'/result/{i}.jpg'.format(i=i))
 
-            video_writer.write(im)
-            os.remove(self.basedir+'/result/{i}.jpg'.format(i=i))
-
-            end = time.time()
+                video_writer.write(im)
+                os.remove(self.basedir+'/result/{i}.jpg'.format(i=i))
             i += 1
+            print(i)
         video_writer.release()
 
-        out_num = 0
-        while os.path.exists(self.basedir+'/output/output_{out}.mp4'.format(out=out_num)):
-            out_num += 1
-        path_out = self.basedir+'/output/output_{out}.mp4'.format(out=out_num)
+        path_out = self.basedir+'/output/{out}.mp4'.format(out=out_id)
         self.add_audio_to_video(path_src, video_out, path_out)
 
         os.remove(video_out)
-        return path_out
+        return True
 
     def add_audio_to_video(self, path_audio_provider, path_video_provider, path_out):
         audio_path = path_audio_provider.split('.')[0] + '.mp3'
