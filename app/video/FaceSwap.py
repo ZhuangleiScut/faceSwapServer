@@ -201,7 +201,8 @@ class FaceSwap(object):
             i += 1
         video_writer.release()
 
-        path_out = self.basedir+'/output/{out}.mp4'.format(out=out_id)
+        # path_out = self.basedir+'/output/{out}.mp4'.format(out=out_id)
+        path_out = "/root/miniproj/data/videos/{out}.mp4".format(out_id)
         self.add_audio_to_video(path_src, video_out, path_out)
 
         os.remove(video_out)
