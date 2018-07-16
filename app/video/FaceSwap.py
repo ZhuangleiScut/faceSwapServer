@@ -127,7 +127,7 @@ class FaceSwap(object):
 
         trgImg = cv2.resize(trgImg, (trgImg.shape[1] * self.SCALE_FACTOR,
                                      trgImg.shape[0] * self.SCALE_FACTOR))
-
+        # trgImg = trgImg.rotate(90)
         landmark1 = self.get_landmarks(srcImg, face_src)
         landmark2 = self.get_landmarks(trgImg, face_user)
 
@@ -161,7 +161,7 @@ class FaceSwap(object):
         video_out = self.basedir+'/out_without_audio.mp4'
 
         # 图片尺寸
-        img_size = (640, 480)
+        img_size = (1280, 720)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
         video_writer = cv2.VideoWriter(video_out, fourcc, fps1, img_size)
@@ -183,7 +183,7 @@ class FaceSwap(object):
             if flip:
                 # 左右翻转
                 frame2 = cv2.flip(frame2, 1)
-
+            frame2 = cv2.transpose(frame2)
             if frame1 is not None and frame2 is not None:
                 out_image = self.deal_image(frame1, face_src, frame2, face_user)
                 if out_image is not None:
@@ -199,7 +199,6 @@ class FaceSwap(object):
                     continue
 
             i += 1
-            print(i)
         video_writer.release()
 
         path_out = self.basedir+'/output/{out}.mp4'.format(out=out_id)
