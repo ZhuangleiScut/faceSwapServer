@@ -17,7 +17,6 @@ def get_video():
     face2 = request.json['face2']
     face_id = request.json['id']
     print(path1, path2)
-    # 传过来的文件名字
     if path1 is not None and path2 is not None:
         if os.path.exists(path1) and os.path.exists(path2):
             face_swap = FaceSwap()

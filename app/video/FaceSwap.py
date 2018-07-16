@@ -2,7 +2,6 @@ import cv2
 import os
 import dlib
 import numpy as np
-import time
 import ffmpy
 
 
@@ -114,13 +113,6 @@ class FaceSwap(object):
         return (im2.astype(np.float64) * im1_blur.astype(np.float64) /
                 im2_blur.astype(np.float64))
 
-    """
-        srcImg：  原视频图片
-        face_src: 原视频脸id
-        trgImg：  用户录制视频图片
-        face_user:用户脸id
-    """
-
     def deal_image(self, srcImg, face_src, trgImg, face_user):
         srcImg = cv2.resize(srcImg, (srcImg.shape[1] * self.SCALE_FACTOR,
                                      srcImg.shape[0] * self.SCALE_FACTOR))
@@ -157,23 +149,20 @@ class FaceSwap(object):
         video2 = cv2.VideoCapture(path_user)
         fps1 = video1.get(cv2.CAP_PROP_FPS)
         fps2 = video2.get(cv2.CAP_PROP_FPS)
-        # 输出视频路径
         video_out = self.basedir+'/out_without_audio.mp4'
 
-        # 图片尺寸
         img_size = (1280, 720)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
         video_writer = cv2.VideoWriter(video_out, fourcc, fps1, img_size)
 
-        if video1.isOpened() and video2.isOpened():  # 判断是否正常打开
+        if video1.isOpened() and video2.isOpened():
             val1, frame1 = video1.read()
             val2, frame2 = video2.read()
         i = 0
         index1 = 1
         index2 = 1
         while frame1 is not None and frame2 is not None:
-            start = time.time()
             val1, frame1 = video1.read()
             index1 += 1
             while index2 < index1 * fps2 / fps1:
@@ -181,7 +170,6 @@ class FaceSwap(object):
                 index2 += 1
 
             if flip:
-                # 左右翻转
                 frame2 = cv2.flip(frame2, 1)
             frame2 = cv2.transpose(frame2)
             if frame1 is not None and frame2 is not None:
@@ -211,20 +199,17 @@ class FaceSwap(object):
     def add_audio_to_video(self, path_audio_provider, path_video_provider, path_out):
         audio_path = path_audio_provider.split('.')[0] + '.mp3'
 
-        # 验证文件夹是否存在
         if os.path.exists(audio_path):
             os.remove(audio_path)
         if os.path.exists(path_out):
             os.remove(path_out)
 
-        # 从原片提取音频
         ff = ffmpy.FFmpeg(
             inputs={path_audio_provider: None},
             outputs={audio_path: '-map 0:a'}
         )
         ff.run()
 
-        # 视频音频合成
         ff = ffmpy.FFmpeg(
             inputs={path_video_provider: None, audio_path: None},
             outputs={path_out: None}
