@@ -8,9 +8,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     RESULT_PATH = 'static/upload/result/'
-    RESULT_FOLDER = os.path.join(basedir, 'APP/', RESULT_PATH)
+    RESULT_FOLDER = os.path.join(basedir, 'app/static/uploads/result/')
 
-    VIDEO_PATH = os.path.join(basedir, 'APP/', 'static/upload/video/')
+    VIDEO_PATH = os.path.join(basedir, 'app/static/upload/video/')
+    IMAGE_PATH = os.path.join(basedir, 'app/static/upload/image/')
 
     SSL_DISABLE = False
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True

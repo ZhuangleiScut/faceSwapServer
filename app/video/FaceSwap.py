@@ -144,6 +144,37 @@ class FaceSwap(object):
         else:
             return None
 
+    def deal_image(self, srcImg, face_src, trgImg, face_user):
+        srcImg = cv2.resize(srcImg, (srcImg.shape[1] * self.SCALE_FACTOR,
+                                     srcImg.shape[0] * self.SCALE_FACTOR))
+
+        trgImg = cv2.resize(trgImg, (trgImg.shape[1] * self.SCALE_FACTOR,
+                                     trgImg.shape[0] * self.SCALE_FACTOR))
+        # trgImg = trgImg.rotate(90)
+        landmark1 = self.get_landmarks(srcImg, face_src)
+        landmark2 = self.get_landmarks(trgImg, face_user)
+
+        if landmark1 is not None and landmark2 is not None:
+            transformation_matrix = self.transformation_from_points(landmark1[self.ALIGN_POINTS],
+                                                                    landmark2[self.ALIGN_POINTS])
+
+            mask = self.get_face_mask(trgImg, landmark2)
+
+            warped_mask = self.warp_im(mask, transformation_matrix, srcImg.shape)
+
+            combined_mask = np.max([self.get_face_mask(srcImg, landmark1), warped_mask], axis=0)
+
+            warped_img2 = self.warp_im(trgImg, transformation_matrix, srcImg.shape)
+
+            warped_corrected_img2 = self.correct_colors(srcImg, warped_img2, landmark1)
+            warped_corrected_img2_temp = np.zeros(warped_corrected_img2.shape, dtype=warped_corrected_img2.dtype)
+            cv2.normalize(warped_corrected_img2, warped_corrected_img2_temp, 0, 1, cv2.NORM_MINMAX)
+
+            output = srcImg * (1.0 - combined_mask) + warped_corrected_img2 * combined_mask
+            return output
+        else:
+            return None
+
     def deal_video(self, path_src, face_src, path_user, face_user, out_id, flip=False):
         video1 = cv2.VideoCapture(path_src)
         video2 = cv2.VideoCapture(path_user)
